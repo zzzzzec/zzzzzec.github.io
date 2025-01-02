@@ -18,37 +18,46 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* 垂直居中 */
+            justify-content: center;
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
+            color: white;
         }
 
         h1 {
             margin: 10px 0;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            font-size: 2.5rem;
         }
 
         #game-board {
             width: 300px;
             height: 600px;
-            background-color: #000;
+            background-color: rgba(0, 0, 0, 0.5);
             display: grid;
             grid-template-columns: repeat(10, 1fr);
             grid-template-rows: repeat(20, 1fr);
             gap: 1px;
-            border: 2px solid #333;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
         }
 
         .cell {
-            background-color: #111;
+            background-color: rgba(255, 255, 255, 0.05);
         }
 
         .piece {
-            background-color: #0f0;
+            background-color: #2196F3;
+            box-shadow: 0 0 5px rgba(33, 150, 243, 0.5);
         }
 
         #score {
             font-size: 24px;
             margin: 10px 0;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(255,255,255,0.3);
         }
 
         #start-button {
@@ -56,6 +65,21 @@
             padding: 10px 20px;
             margin: 10px 0;
             cursor: pointer;
+            background: linear-gradient(45deg, #2196F3, #00BCD4);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        #start-button:hover {
+            transform: scale(1.05);
+        }
+
+        #start-button:disabled {
+            background: linear-gradient(45deg, #666, #999);
+            cursor: not-allowed;
+            transform: none;
         }
 
         .control-panel {
@@ -78,12 +102,17 @@
         .control-btn {
             width: 60px;
             height: 60px;
-            background: rgba(0,0,0,0.5);
-            border: none;
+            background: rgba(33, 150, 243, 0.3);
+            border: 2px solid rgba(33, 150, 243, 0.5);
             border-radius: 50%;
             color: white;
             font-size: 24px;
             touch-action: manipulation;
+            transition: background-color 0.2s;
+        }
+
+        .control-btn:active {
+            background: rgba(33, 150, 243, 0.5);
         }
 
         @media (max-width: 600px) {
@@ -119,6 +148,15 @@
                 font-size: 20px;
             }
         }
+
+        /* 添加各种方块的颜色 */
+        .piece-0 { background-color: #2196F3; } /* I形方块 */
+        .piece-1 { background-color: #FFC107; } /* O形方块 */
+        .piece-2 { background-color: #9C27B0; } /* T形方块 */
+        .piece-3 { background-color: #4CAF50; } /* L形方块 */
+        .piece-4 { background-color: #FF5722; } /* J形方块 */
+        .piece-5 { background-color: #E91E63; } /* S形方块 */
+        .piece-6 { background-color: #00BCD4; } /* Z形方块 */
     </style>
 </head>
 <!-- 其余HTML和JavaScript代码保持不变 -->

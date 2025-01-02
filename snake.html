@@ -121,82 +121,183 @@
             <button class="control-btn" id="rightBtn">→</button>
         </div>
     </div>
-
     <script>
+    // 在 <script> 标签内替换原有代码：
+
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const box = 20;
         const rows = canvas.height / box;
         const cols = canvas.width / box;
-
+        
         let score = 0;
         const scoreDisplay = document.getElementById("score");
-
+        
         let snake = [{ x: 5 * box, y: 5 * box }];
         let direction = "RIGHT";
         let newDirection = "RIGHT";
-
+        let lastUpdateTime = 0;
+        const moveInterval = 150; // 降低移动间隔，让蛇移动更快
         let food = { x: Math.floor(Math.random() * cols) * box, y: Math.floor(Math.random() * rows) * box };
-
+        let gameLoop;
+        let isPaused = false;
+        
+        // 方向队列，用于存储快速按键
+        let directionQueue = [];
+        
         function isMobile() {
             return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         }
-
-        // 统一的方向改变处理函数
+        
+        // 改进的方向改变处理函数
         function handleDirectionChange(newDir) {
-            if (newDir === "LEFT" && direction !== "RIGHT") newDirection = newDir;
-            if (newDir === "UP" && direction !== "DOWN") newDirection = newDir;
-            if (newDir === "RIGHT" && direction !== "LEFT") newDirection = newDir;
-            if (newDir === "DOWN" && direction !== "UP") newDirection = newDir;
+            // 检查是否与当前方向相反
+            if ((newDir === "LEFT" && direction !== "RIGHT") ||
+                (newDir === "UP" && direction !== "DOWN") ||
+                (newDir === "RIGHT" && direction !== "LEFT") ||
+                (newDir === "DOWN" && direction !== "UP")) {
+                
+                // 只保留最后两个方向指令
+                if (directionQueue.length < 2) {
+                    directionQueue.push(newDir);
+                }
+            }
         }
-
+        
         // 键盘控制
         document.addEventListener("keydown", (event) => {
-            const key = event.keyCode;
-            if (key === 37) handleDirectionChange("LEFT");
-            if (key === 38) handleDirectionChange("UP");
-            if (key === 39) handleDirectionChange("RIGHT");
-            if (key === 40) handleDirectionChange("DOWN");
+            if (isPaused) return;
+            
+            switch(event.keyCode) {
+                case 37: // 左
+                    handleDirectionChange("LEFT");
+                    break;
+                case 38: // 上
+                    handleDirectionChange("UP");
+                    break;
+                case 39: // 右
+                    handleDirectionChange("RIGHT");
+                    break;
+                case 40: // 下
+                    handleDirectionChange("DOWN");
+                    break;
+                case 32: // 空格键暂停
+                    togglePause();
+                    break;
+            }
         });
-
+        
         // 移动端控制
         if (isMobile()) {
-            document.getElementById('leftBtn').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                handleDirectionChange("LEFT");
+            const controls = ['leftBtn', 'upBtn', 'rightBtn', 'downBtn'];
+            const directions = ['LEFT', 'UP', 'RIGHT', 'DOWN'];
+            
+            controls.forEach((btnId, index) => {
+                const btn = document.getElementById(btnId);
+                let touchInterval;
+                
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (isPaused) return;
+                    
+                    handleDirectionChange(directions[index]);
+                    
+                    // 长按连续移动
+                    touchInterval = setInterval(() => {
+                        handleDirectionChange(directions[index]);
+                    }, 100);
+                });
+                
+                btn.addEventListener('touchend', () => {
+                    clearInterval(touchInterval);
+                });
             });
-            document.getElementById('upBtn').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                handleDirectionChange("UP");
-            });
-            document.getElementById('rightBtn').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                handleDirectionChange("RIGHT");
-            });
-            document.getElementById('downBtn').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                handleDirectionChange("DOWN");
-            });
-
-            // 禁止页面滚动
+        
             document.body.style.overflow = 'hidden';
             document.addEventListener('touchmove', (e) => {
                 e.preventDefault();
             }, { passive: false });
         }
-
+        
+        function togglePause() {
+            isPaused = !isPaused;
+            if (!isPaused) {
+                gameLoop = requestAnimationFrame(update);
+            }
+        }
+        
+        function update(timestamp) {
+            if (isPaused) return;
+        
+            if (timestamp - lastUpdateTime >= moveInterval) {
+                // 处理方向队列
+                if (directionQueue.length > 0) {
+                    direction = directionQueue.shift();
+                }
+                
+                // 蛇头位置
+                let headX = snake[0].x;
+                let headY = snake[0].y;
+        
+                switch(direction) {
+                    case "LEFT": headX -= box; break;
+                    case "UP": headY -= box; break;
+                    case "RIGHT": headX += box; break;
+                    case "DOWN": headY += box; break;
+                }
+        
+                // 检查是否吃到食物
+                if (headX === food.x && headY === food.y) {
+                    score += 10;
+                    scoreDisplay.innerText = `分数: ${score}`;
+                    food = {
+                        x: Math.floor(Math.random() * cols) * box,
+                        y: Math.floor(Math.random() * rows) * box
+                    };
+                    // 确保食物不会出现在蛇身上
+                    while (snake.some(segment => segment.x === food.x && segment.y === food.y)) {
+                        food = {
+                            x: Math.floor(Math.random() * cols) * box,
+                            y: Math.floor(Math.random() * rows) * box
+                        };
+                    }
+                } else {
+                    snake.pop();
+                }
+        
+                // 穿墙效果
+                if (headX >= canvas.width) headX = 0;
+                if (headX < 0) headX = canvas.width - box;
+                if (headY >= canvas.height) headY = 0;
+                if (headY < 0) headY = canvas.height - box;
+        
+                const newHead = { x: headX, y: headY };
+        
+                // 碰撞检测
+                if (collision(newHead)) {
+                    cancelAnimationFrame(gameLoop);
+                    alert(`游戏结束！\n你的得分是: ${score}`);
+                    location.reload();
+                    return;
+                }
+        
+                snake.unshift(newHead);
+                lastUpdateTime = timestamp;
+                draw();
+            }
+        
+            gameLoop = requestAnimationFrame(update);
+        }
+        
         function draw() {
-            // 更新实际方向
-            direction = newDirection;
-
             // 清空画布并设置渐变背景
             const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
             gradient.addColorStop(0, '#1a1a1a');
             gradient.addColorStop(1, '#4a4a4a');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // 绘制网格（可选）
+        
+            // 绘制网格
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
             for(let i = 0; i < cols; i++) {
                 ctx.beginPath();
@@ -210,76 +311,37 @@
                 ctx.lineTo(canvas.width, i * box);
                 ctx.stroke();
             }
-
+        
             // 绘制蛇
-            for (let i = 0; i < snake.length; i++) {
+            snake.forEach((segment, i) => {
                 if (i === 0) {
                     // 蛇头
                     ctx.fillStyle = "#2196F3";
                     ctx.beginPath();
-                    ctx.arc(snake[i].x + box/2, snake[i].y + box/2, box/2 - 2, 0, Math.PI * 2);
+                    ctx.arc(segment.x + box/2, segment.y + box/2, box/2 - 2, 0, Math.PI * 2);
                     ctx.fill();
                 } else {
                     // 蛇身
                     ctx.fillStyle = i % 2 === 0 ? "#00BCD4" : "#80DEEA";
                     ctx.beginPath();
-                    ctx.roundRect(snake[i].x + 2, snake[i].y + 2, box - 4, box - 4, 5);
+                    ctx.roundRect(segment.x + 2, segment.y + 2, box - 4, box - 4, 5);
                     ctx.fill();
                 }
-            }
-
+            });
+        
             // 绘制食物
             ctx.fillStyle = "#FF5252";
             ctx.beginPath();
             ctx.arc(food.x + box/2, food.y + box/2, box/3, 0, Math.PI * 2);
             ctx.fill();
-
-            // 蛇头位置
-            let headX = snake[0].x;
-            let headY = snake[0].y;
-
-            if (direction === "LEFT") headX -= box;
-            if (direction === "UP") headY -= box;
-            if (direction === "RIGHT") headX += box;
-            if (direction === "DOWN") headY += box;
-
-            // 检查是否吃到食物
-            if (headX === food.x && headY === food.y) {
-                score += 10;
-                scoreDisplay.innerText = `分数: ${score}`;
-                food = {
-                    x: Math.floor(Math.random() * cols) * box,
-                    y: Math.floor(Math.random() * rows) * box
-                };
-            } else {
-                snake.pop();
-            }
-
-            const newHead = { x: headX, y: headY };
-            snake.unshift(newHead);
-
-            // 碰撞检测
-            if (
-                headX < 0 || headY < 0 || 
-                headX >= canvas.width || headY >= canvas.height || 
-                collision(newHead)
-            ) {
-                clearInterval(game);
-                alert(`游戏结束！\n你的得分是: ${score}`);
-                location.reload();
-            }
         }
-
+        
         function collision(head) {
-            for (let i = 1; i < snake.length; i++) {
-                if (head.x === snake[i].x && head.y === snake[i].y) {
-                    return true;
-                }
-            }
-            return false;
+            return snake.slice(1).some(segment => segment.x === head.x && segment.y === head.y);
         }
-
-        const game = setInterval(draw, 400);
+        
+        // 开始游戏循环
+        gameLoop = requestAnimationFrame(update);
     </script>
 </body>
 </html>

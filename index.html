@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <title>AI游戏示例</title>
+    <title>AI自动编程示例</title>
     <style>
         html, body {
             margin: 0;
@@ -25,7 +25,7 @@
             right: 0;
             bottom: 0;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch; /* 为 iOS 添加弹性滚动 */
+            -webkit-overflow-scrolling: touch;
             background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
             color: white;
         }
@@ -165,8 +165,9 @@
     <div id="wrapper">
         <div class="content">
             <div class="header">
-                <h1>AI游戏示例</h1>
-                <div class="subtitle">选择一个游戏开始玩吧！</div>
+                <h1>AI自动编程示例</h1>
+                <div class="subtitle">选择一个进行体验！</div>
+                <div class="subtitle">所有代码由 Claude-3.5-Sonnet 自动生成！</div>
             </div>
 
             <div class="games-container">
@@ -188,6 +189,16 @@
                         注意不要撞到墙壁或自己的身体！
                     </div>
                     <button class="play-button">开始游戏</button>
+                </div>
+
+                <div class="game-card" onclick="location.href='anime.html'">
+                    <div class="game-icon">🎆</div>
+                    <div class="game-title">烟花动画</div>
+                    <div class="game-description">
+                        绚丽多彩的烟花动画效果，可以切换节日祝福。
+                        点击屏幕任意位置即可放烟花！
+                    </div>
+                    <button class="play-button">观看演示</button>
                 </div>
             </div>
         </div>

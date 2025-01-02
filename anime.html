@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>烟花动画</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .text {
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 3em;
+            text-shadow: 0 0 10px #ff0;
+            animation: glow 2s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px #ff0; }
+            50% { text-shadow: 0 0 20px #ff0, 0 0 30px #fa0; }
+        }
+
+        .buttons {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 5px;
+            background: #ff0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            background: #fa0;
+        }
+
+        .firework {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .firework-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(100vh); opacity: 1; }
+            50% { opacity: 1; }
+            100% { transform: translateY(var(--targetY)); opacity: 0; }
+        }
+
+        @keyframes explode {
+            0% { transform: translate(0, 0); opacity: 1; }
+            100% { 
+                transform: translate(var(--dx), var(--dy));
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="text" id="greetingText">新年快乐！</div>
+        <div class="buttons">
+            <button onclick="toggleGreeting('新年快乐！')">新年快乐</button>
+            <button onclick="toggleGreeting('生日快乐！')">生日快乐</button>
+        </div>
+    </div>
+
+    <script>
+        function launchFirework() {
+            // 创建上升的烟花
+            const firework = document.createElement('div');
+            firework.className = 'firework';
+            
+            // 随机起始位置
+            const startX = Math.random() * window.innerWidth;
+            const targetY = window.innerHeight * (Math.random() * 0.6); // 增加爆炸高度范围
+            
+            firework.style.left = startX + 'px';
+            firework.style.bottom = '0';
+            firework.style.setProperty('--targetY', `-${window.innerHeight - targetY}px`);
+            firework.style.animation = 'rise 1s ease-out forwards';
+            
+            document.body.appendChild(firework);
+
+            // 烟花上升结束后爆炸
+            setTimeout(() => {
+                createExplosion(startX, targetY);
+                document.body.removeChild(firework);
+            }, 1000);
+        }
+
+        function createExplosion(x, y) {
+            const colors = ['#ff0', '#f0f', '#0ff', '#ff5733', '#33ff57', '#ff3366', '#33ff99', '#ff99cc'];
+            const particles = 80; // 增加粒子数量
+            
+            for (let i = 0; i < particles; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'firework-particle';
+                
+                // 随机角度和距离
+                const angle = (Math.PI * 2 * i) / particles + Math.random() * 0.2;
+                const velocity = 100 + Math.random() * 150; // 增加粒子速度范围
+                
+                // 计算粒子终点位置
+                const dx = Math.cos(angle) * velocity;
+                const dy = Math.sin(angle) * velocity;
+                
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.setProperty('--dx', dx + 'px');
+                particle.style.setProperty('--dy', dy + 'px');
+                particle.style.animation = 'explode 1.2s ease-out forwards';
+                
+                document.body.appendChild(particle);
+                
+                // 动画结束后移除粒子
+                setTimeout(() => {
+                    document.body.removeChild(particle);
+                }, 1200);
+            }
+        }
+
+        function toggleGreeting(text) {
+            document.getElementById('greetingText').innerText = text;
+        }
+
+        // 同时发射多个烟花
+        function multipleFireworks() {
+            const count = Math.floor(Math.random() * 3) + 2; // 2-4个烟花
+            for(let i = 0; i < count; i++) {
+                setTimeout(launchFirework, Math.random() * 300); // 随机延迟发射
+            }
+        }
+
+        // 更频繁地发射烟花
+        setInterval(multipleFireworks, 800);
+
+        // 点击屏幕发射更多烟花
+        document.addEventListener('click', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            // 点击时创建多个爆炸效果
+            for(let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    createExplosion(
+                        x + (Math.random() - 0.5) * 50, // 在点击位置周围随机位置爆炸
+                        y + (Math.random() - 0.5) * 50
+                    );
+                }, i * 100);
+            }
+        });
+    </script>
+</body>
+</html>
