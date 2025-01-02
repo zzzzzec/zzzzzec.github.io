@@ -5,13 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>俄罗斯方块</title>
     <style>
+        /* 禁止所有设备的滚动 */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center; /* 垂直居中 */
             font-family: Arial, sans-serif;
             background-color: #f0f0f0;
         }
+
+        h1 {
+            margin: 10px 0;
+        }
+
         #game-board {
             width: 300px;
             height: 600px;
@@ -22,35 +37,108 @@
             gap: 1px;
             border: 2px solid #333;
         }
+
         .cell {
             background-color: #111;
         }
+
         .piece {
             background-color: #0f0;
         }
+
         #score {
             font-size: 24px;
-            margin: 20px 0;
+            margin: 10px 0;
         }
+
         #start-button {
             font-size: 18px;
             padding: 10px 20px;
-            margin-bottom: 20px;
+            margin: 10px 0;
             cursor: pointer;
         }
+
+        .control-panel {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            gap: 10px;
+            width: 240px;
+        }
+        
+        .control-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(0,0,0,0.5);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            touch-action: manipulation;
+        }
+
         @media (max-width: 600px) {
+            h1 {
+                font-size: 24px;
+                margin: 5px 0;
+            }
+
             #game-board {
                 width: 240px;
                 height: 480px;
             }
+
+            #score {
+                font-size: 20px;
+                margin: 5px 0;
+            }
+
+            #start-button {
+                font-size: 16px;
+                padding: 8px 16px;
+                margin: 5px 0;
+            }
+
+            .control-panel {
+                display: block;
+                bottom: 10px;
+            }
+
+            .control-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
         }
     </style>
 </head>
+<!-- 其余HTML和JavaScript代码保持不变 -->
 <body>
     <h1>俄罗斯方块</h1>
     <div id="score">分数: 0</div>
     <button id="start-button">开始游戏</button>
     <div id="game-board"></div>
+
+    <!-- 新增移动端控制面板 -->
+    <div class="control-panel">
+        <div class="control-row">
+            <button class="control-btn" id="rotateBtn">↻</button>
+        </div>
+        <div class="control-row">
+            <button class="control-btn" id="leftBtn">←</button>
+            <button class="control-btn" id="downBtn">↓</button>
+            <button class="control-btn" id="rightBtn">→</button>
+        </div>
+    </div>
 
     <script>
         const board = document.getElementById('game-board');
@@ -61,16 +149,16 @@
         let score = 0;
         let currentPiece;
         let interval;
-
+        // 你原来的代码保持不变，直到handleKeyPress函数之前
         const pieces = [
-            [[1, 1, 1, 1]],
-            [[1, 1], [1, 1]],
-            [[1, 1, 1], [0, 1, 0]],
-            [[1, 1, 1], [1, 0, 0]],
-            [[1, 1, 1], [0, 0, 1]],
-            [[1, 1, 0], [0, 1, 1]],
-            [[0, 1, 1], [1, 1, 0]]
-        ];
+        [[1, 1, 1, 1]],
+        [[1, 1], [1, 1]],
+        [[1, 1, 1], [0, 1, 0]],
+        [[1, 1, 1], [1, 0, 0]],
+        [[1, 1, 1], [0, 0, 1]],
+        [[1, 1, 0], [0, 1, 1]],
+        [[0, 1, 1], [1, 1, 0]]
+    ];
 
         function createBoard() {
             for (let i = 0; i < ROWS * COLS; i++) {
@@ -202,21 +290,67 @@
             clearInterval(interval);
             alert(`游戏结束！你的得分是: ${score}`);
         }
-
-        function handleKeyPress(event) {
-            switch(event.key) {
+        // 修改handleKeyPress函数，添加按键代码参数
+        function handleKeyPress(keyCode) {
+            switch(keyCode) {
                 case 'ArrowLeft':
+                case 37:
                     moveLeft();
                     break;
                 case 'ArrowRight':
+                case 39:
                     moveRight();
                     break;
                 case 'ArrowDown':
+                case 40:
                     moveDown();
                     break;
                 case 'ArrowUp':
+                case 38:
                     rotate();
                     break;
+            }
+        }
+
+        // 检测是否为移动设备
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // 初始化控制器
+        function initControls() {
+            if (isMobile()) {
+                // 移动端触摸控制
+                document.getElementById('leftBtn').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleKeyPress('ArrowLeft');
+                });
+                
+                document.getElementById('rightBtn').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleKeyPress('ArrowRight');
+                });
+                
+                document.getElementById('downBtn').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleKeyPress('ArrowDown');
+                });
+                
+                document.getElementById('rotateBtn').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    handleKeyPress('ArrowUp');
+                });
+
+                // 禁止页面滚动
+                document.body.style.overflow = 'hidden';
+                document.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                }, { passive: false });
+            } else {
+                // PC端键盘控制
+                document.addEventListener('keydown', (e) => {
+                    handleKeyPress(e.key);
+                });
             }
         }
 
@@ -231,7 +365,7 @@
                 clearInterval(interval);
             }
             interval = setInterval(moveDown, 1000);
-            document.addEventListener('keydown', handleKeyPress);
+            initControls(); // 初始化控制器
             startButton.removeEventListener('click', startGame);
             startButton.textContent = '游戏进行中';
             startButton.disabled = true;
