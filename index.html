@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>俄罗斯方块</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        #game-board {
+            width: 300px;
+            height: 600px;
+            background-color: #000;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(20, 1fr);
+            gap: 1px;
+            border: 2px solid #333;
+        }
+        .cell {
+            background-color: #111;
+        }
+        .piece {
+            background-color: #0f0;
+        }
+        #score {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+        #start-button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        @media (max-width: 600px) {
+            #game-board {
+                width: 240px;
+                height: 480px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>俄罗斯方块</h1>
+    <div id="score">分数: 0</div>
+    <button id="start-button">开始游戏</button>
+    <div id="game-board"></div>
+
+    <script>
+        const board = document.getElementById('game-board');
+        const scoreDisplay = document.getElementById('score');
+        const startButton = document.getElementById('start-button');
+        const ROWS = 20;
+        const COLS = 10;
+        let score = 0;
+        let currentPiece;
+        let interval;
+
+        const pieces = [
+            [[1, 1, 1, 1]],
+            [[1, 1], [1, 1]],
+            [[1, 1, 1], [0, 1, 0]],
+            [[1, 1, 1], [1, 0, 0]],
+            [[1, 1, 1], [0, 0, 1]],
+            [[1, 1, 0], [0, 1, 1]],
+            [[0, 1, 1], [1, 1, 0]]
+        ];
+
+        function createBoard() {
+            for (let i = 0; i < ROWS * COLS; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                board.appendChild(cell);
+            }
+        }
+
+        function getRandomPiece() {
+            const pieceIndex = Math.floor(Math.random() * pieces.length);
+            const piece = pieces[pieceIndex];
+            const colorClass = `piece-${pieceIndex}`;
+            return { shape: piece, row: 0, col: Math.floor(COLS / 2) - Math.floor(piece[0].length / 2), colorClass };
+        }
+
+        function drawPiece() {
+            currentPiece.shape.forEach((row, i) => {
+                row.forEach((cell, j) => {
+                    if (cell) {
+                        const index = (currentPiece.row + i) * COLS + (currentPiece.col + j);
+                        board.children[index].classList.add('piece', currentPiece.colorClass);
+                    }
+                });
+            });
+        }
+
+        function erasePiece() {
+            currentPiece.shape.forEach((row, i) => {
+                row.forEach((cell, j) => {
+                    if (cell) {
+                        const index = (currentPiece.row + i) * COLS + (currentPiece.col + j);
+                        board.children[index].classList.remove('piece', currentPiece.colorClass);
+                    }
+                });
+            });
+        }
+
+        function moveDown() {
+            erasePiece();
+            currentPiece.row++;
+            if (checkCollision()) {
+                currentPiece.row--;
+                drawPiece();
+                solidifyPiece();
+                clearLines();
+                currentPiece = getRandomPiece();
+                if (checkCollision()) {
+                    gameOver();
+                }
+            }
+            drawPiece();
+        }
+
+        function moveLeft() {
+            erasePiece();
+            currentPiece.col--;
+            if (checkCollision()) {
+                currentPiece.col++;
+            }
+            drawPiece();
+        }
+
+        function moveRight() {
+            erasePiece();
+            currentPiece.col++;
+            if (checkCollision()) {
+                currentPiece.col--;
+            }
+            drawPiece();
+        }
+
+        function rotate() {
+            erasePiece();
+            const rotated = currentPiece.shape[0].map((_, i) => 
+                currentPiece.shape.map(row => row[i]).reverse()
+            );
+            const originalShape = currentPiece.shape;
+            currentPiece.shape = rotated;
+            if (checkCollision()) {
+                currentPiece.shape = originalShape;
+            }
+            drawPiece();
+        }
+
+        function checkCollision() {
+            return currentPiece.shape.some((row, i) => 
+                row.some((cell, j) => {
+                    if (cell) {
+                        const boardRow = currentPiece.row + i;
+                        const boardCol = currentPiece.col + j;
+                        return boardRow >= ROWS || boardCol < 0 || boardCol >= COLS || 
+                            (boardRow >= 0 && board.children[boardRow * COLS + boardCol].classList.contains('piece'));
+                    }
+                    return false;
+                })
+            );
+        }
+
+        function solidifyPiece() {
+            currentPiece.shape.forEach((row, i) => {
+                row.forEach((cell, j) => {
+                    if (cell) {
+                        const index = (currentPiece.row + i) * COLS + (currentPiece.col + j);
+                        board.children[index].classList.add('piece');
+                    }
+                });
+            });
+        }
+
+        function clearLines() {
+            for (let i = ROWS - 1; i >= 0; i--) {
+                const row = Array.from(board.children).slice(i * COLS, (i + 1) * COLS);
+                if (row.every(cell => cell.classList.contains('piece'))) {
+                    row.forEach(cell => {
+                        cell.classList.remove('piece');
+                        cell.classList.remove(...Array.from(cell.classList).filter(c => c.startsWith('piece-')));
+                    });
+                    const removedRow = Array.from(board.children).splice(i * COLS, COLS);
+                    board.prepend(...removedRow);
+                    score += 100;
+                    scoreDisplay.textContent = `分数: ${score}`;
+                    i++;
+                }
+            }
+        }
+
+        function gameOver() {
+            clearInterval(interval);
+            alert(`游戏结束！你的得分是: ${score}`);
+        }
+
+        function handleKeyPress(event) {
+            switch(event.key) {
+                case 'ArrowLeft':
+                    moveLeft();
+                    break;
+                case 'ArrowRight':
+                    moveRight();
+                    break;
+                case 'ArrowDown':
+                    moveDown();
+                    break;
+                case 'ArrowUp':
+                    rotate();
+                    break;
+            }
+        }
+
+        function startGame() {
+            board.innerHTML = '';
+            score = 0;
+            scoreDisplay.textContent = `分数: ${score}`;
+            createBoard();
+            currentPiece = getRandomPiece();
+            drawPiece();
+            if (interval) {
+                clearInterval(interval);
+            }
+            interval = setInterval(moveDown, 1000);
+            document.addEventListener('keydown', handleKeyPress);
+            startButton.removeEventListener('click', startGame);
+            startButton.textContent = '游戏进行中';
+            startButton.disabled = true;
+        }
+
+        startButton.addEventListener('click', startGame);
+    </script>
+</body>
+</html>
