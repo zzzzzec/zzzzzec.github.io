@@ -3,375 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>俄罗斯方块</title>
+    <title>AI游戏示例</title>
     <style>
-        /* 禁止所有设备的滚动 */
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
+            font-family: Arial, sans-serif;
         }
 
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* 垂直居中 */
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
+            color: white;
+        }
+
+        .header {
+            text-align: center;
+            margin: 2rem 0;
         }
 
         h1 {
-            margin: 10px 0;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
 
-        #game-board {
+        .subtitle {
+            font-size: 1.2rem;
+            color: #aaa;
+        }
+
+        .games-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+            padding: 0 1rem;
+        }
+
+        .game-card {
             width: 300px;
-            height: 600px;
-            background-color: #000;
-            display: grid;
-            grid-template-columns: repeat(10, 1fr);
-            grid-template-rows: repeat(20, 1fr);
-            gap: 1px;
-            border: 2px solid #333;
-        }
-
-        .cell {
-            background-color: #111;
-        }
-
-        .piece {
-            background-color: #0f0;
-        }
-
-        #score {
-            font-size: 24px;
-            margin: 10px 0;
-        }
-
-        #start-button {
-            font-size: 18px;
-            padding: 10px 20px;
-            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
             cursor: pointer;
         }
 
-        .control-panel {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            gap: 10px;
-            width: 240px;
-        }
-        
-        .control-row {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 10px;
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
         }
 
-        .control-btn {
-            width: 60px;
-            height: 60px;
-            background: rgba(0,0,0,0.5);
+        .game-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .game-description {
+            font-size: 1rem;
+            color: #ccc;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .play-button {
+            background: linear-gradient(45deg, #2196F3, #00BCD4);
             border: none;
-            border-radius: 50%;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
             color: white;
-            font-size: 24px;
-            touch-action: manipulation;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
         }
 
-        @media (max-width: 600px) {
+        .play-button:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                margin: 1rem 0;
+            }
+
             h1 {
-                font-size: 24px;
-                margin: 5px 0;
+                font-size: 2rem;
             }
 
-            #game-board {
-                width: 240px;
-                height: 480px;
+            .subtitle {
+                font-size: 1rem;
             }
 
-            #score {
-                font-size: 20px;
-                margin: 5px 0;
-            }
-
-            #start-button {
-                font-size: 16px;
-                padding: 8px 16px;
-                margin: 5px 0;
-            }
-
-            .control-panel {
-                display: block;
-                bottom: 10px;
-            }
-
-            .control-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
+            .game-card {
+                width: 280px;
             }
         }
     </style>
 </head>
-<!-- 其余HTML和JavaScript代码保持不变 -->
 <body>
-    <h1>俄罗斯方块</h1>
-    <div id="score">分数: 0</div>
-    <button id="start-button">开始游戏</button>
-    <div id="game-board"></div>
+    <div class="header">
+        <h1>AI游戏示例</h1>
+        <div class="subtitle">选择一个游戏开始玩吧！</div>
+    </div>
 
-    <!-- 新增移动端控制面板 -->
-    <div class="control-panel">
-        <div class="control-row">
-            <button class="control-btn" id="rotateBtn">↻</button>
+    <div class="games-container">
+        <div class="game-card" onclick="location.href='tetris.html'">
+            <div class="game-icon">🟦</div>
+            <div class="game-title">俄罗斯方块</div>
+            <div class="game-description">
+                经典的俄罗斯方块游戏，通过旋转和移动不同形状的方块，创建完整的行来得分。
+                适配PC和移动端，支持触控操作。
+            </div>
+            <button class="play-button">开始游戏</button>
         </div>
-        <div class="control-row">
-            <button class="control-btn" id="leftBtn">←</button>
-            <button class="control-btn" id="downBtn">↓</button>
-            <button class="control-btn" id="rightBtn">→</button>
+
+        <div class="game-card" onclick="location.href='snake.html'">
+            <div class="game-icon">🐍</div>
+            <div class="game-title">贪吃蛇</div>
+            <div class="game-description">
+                控制蛇移动收集食物，让它不断长大。
+                注意不要撞到墙壁或自己的身体！
+            </div>
+            <button class="play-button">开始游戏</button>
         </div>
     </div>
 
     <script>
-        const board = document.getElementById('game-board');
-        const scoreDisplay = document.getElementById('score');
-        const startButton = document.getElementById('start-button');
-        const ROWS = 20;
-        const COLS = 10;
-        let score = 0;
-        let currentPiece;
-        let interval;
-        // 你原来的代码保持不变，直到handleKeyPress函数之前
-        const pieces = [
-        [[1, 1, 1, 1]],
-        [[1, 1], [1, 1]],
-        [[1, 1, 1], [0, 1, 0]],
-        [[1, 1, 1], [1, 0, 0]],
-        [[1, 1, 1], [0, 0, 1]],
-        [[1, 1, 0], [0, 1, 1]],
-        [[0, 1, 1], [1, 1, 0]]
-    ];
-
-        function createBoard() {
-            for (let i = 0; i < ROWS * COLS; i++) {
-                const cell = document.createElement('div');
-                cell.classList.add('cell');
-                board.appendChild(cell);
-            }
-        }
-
-        function getRandomPiece() {
-            const pieceIndex = Math.floor(Math.random() * pieces.length);
-            const piece = pieces[pieceIndex];
-            const colorClass = `piece-${pieceIndex}`;
-            return { shape: piece, row: 0, col: Math.floor(COLS / 2) - Math.floor(piece[0].length / 2), colorClass };
-        }
-
-        function drawPiece() {
-            currentPiece.shape.forEach((row, i) => {
-                row.forEach((cell, j) => {
-                    if (cell) {
-                        const index = (currentPiece.row + i) * COLS + (currentPiece.col + j);
-                        board.children[index].classList.add('piece', currentPiece.colorClass);
-                    }
-                });
-            });
-        }
-
-        function erasePiece() {
-            currentPiece.shape.forEach((row, i) => {
-                row.forEach((cell, j) => {
-                    if (cell) {
-                        const index = (currentPiece.row + i) * COLS + (currentPiece.col + j);
-                        board.children[index].classList.remove('piece', currentPiece.colorClass);
-                    }
-                });
-            });
-        }
-
-        function moveDown() {
-            erasePiece();
-            currentPiece.row++;
-            if (checkCollision()) {
-                currentPiece.row--;
-                drawPiece();
-                solidifyPiece();
-                clearLines();
-                currentPiece = getRandomPiece();
-                if (checkCollision()) {
-                    gameOver();
-                }
-            }
-            drawPiece();
-        }
-
-        function moveLeft() {
-            erasePiece();
-            currentPiece.col--;
-            if (checkCollision()) {
-                currentPiece.col++;
-            }
-            drawPiece();
-        }
-
-        function moveRight() {
-            erasePiece();
-            currentPiece.col++;
-            if (checkCollision()) {
-                currentPiece.col--;
-            }
-            drawPiece();
-        }
-
-        function rotate() {
-            erasePiece();
-            const rotated = currentPiece.shape[0].map((_, i) => 
-                currentPiece.shape.map(row => row[i]).reverse()
-            );
-            const originalShape = currentPiece.shape;
-            currentPiece.shape = rotated;
-            if (checkCollision()) {
-                currentPiece.shape = originalShape;
-            }
-            drawPiece();
-        }
-
-        function checkCollision() {
-            return currentPiece.shape.some((row, i) => 
-                row.some((cell, j) => {
-                    if (cell) {
-                        const boardRow = currentPiece.row + i;
-                        const boardCol = currentPiece.col + j;
-                        return boardRow >= ROWS || boardCol < 0 || boardCol >= COLS || 
-                            (boardRow >= 0 && board.children[boardRow * COLS + boardCol].classList.contains('piece'));
-                    }
-                    return false;
-                })
-            );
-        }
-
-        function solidifyPiece() {
-            currentPiece.shape.forEach((row, i) => {
-                row.forEach((cell, j) => {
-                    if (cell) {
-                        const index = (currentPiece.row + i) * COLS + (currentPiece.col + j);
-                        board.children[index].classList.add('piece');
-                    }
-                });
-            });
-        }
-
-        function clearLines() {
-            for (let i = ROWS - 1; i >= 0; i--) {
-                const row = Array.from(board.children).slice(i * COLS, (i + 1) * COLS);
-                if (row.every(cell => cell.classList.contains('piece'))) {
-                    row.forEach(cell => {
-                        cell.classList.remove('piece');
-                        cell.classList.remove(...Array.from(cell.classList).filter(c => c.startsWith('piece-')));
-                    });
-                    const removedRow = Array.from(board.children).splice(i * COLS, COLS);
-                    board.prepend(...removedRow);
-                    score += 100;
-                    scoreDisplay.textContent = `分数: ${score}`;
-                    i++;
-                }
-            }
-        }
-
-        function gameOver() {
-            clearInterval(interval);
-            alert(`游戏结束！你的得分是: ${score}`);
-        }
-        // 修改handleKeyPress函数，添加按键代码参数
-        function handleKeyPress(keyCode) {
-            switch(keyCode) {
-                case 'ArrowLeft':
-                case 37:
-                    moveLeft();
-                    break;
-                case 'ArrowRight':
-                case 39:
-                    moveRight();
-                    break;
-                case 'ArrowDown':
-                case 40:
-                    moveDown();
-                    break;
-                case 'ArrowUp':
-                case 38:
-                    rotate();
-                    break;
-            }
-        }
-
-        // 检测是否为移动设备
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        // 初始化控制器
-        function initControls() {
-            if (isMobile()) {
-                // 移动端触摸控制
-                document.getElementById('leftBtn').addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    handleKeyPress('ArrowLeft');
-                });
-                
-                document.getElementById('rightBtn').addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    handleKeyPress('ArrowRight');
-                });
-                
-                document.getElementById('downBtn').addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    handleKeyPress('ArrowDown');
-                });
-                
-                document.getElementById('rotateBtn').addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    handleKeyPress('ArrowUp');
-                });
-
-                // 禁止页面滚动
-                document.body.style.overflow = 'hidden';
-                document.addEventListener('touchmove', (e) => {
-                    e.preventDefault();
-                }, { passive: false });
-            } else {
-                // PC端键盘控制
-                document.addEventListener('keydown', (e) => {
-                    handleKeyPress(e.key);
-                });
-            }
-        }
-
-        function startGame() {
-            board.innerHTML = '';
-            score = 0;
-            scoreDisplay.textContent = `分数: ${score}`;
-            createBoard();
-            currentPiece = getRandomPiece();
-            drawPiece();
-            if (interval) {
-                clearInterval(interval);
-            }
-            interval = setInterval(moveDown, 1000);
-            initControls(); // 初始化控制器
-            startButton.removeEventListener('click', startGame);
-            startButton.textContent = '游戏进行中';
-            startButton.disabled = true;
-        }
-
-        startButton.addEventListener('click', startGame);
+        // 防止在移动设备上出现滚动
+        document.body.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
