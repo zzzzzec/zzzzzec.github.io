@@ -2,26 +2,41 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>AI游戏示例</title>
     <style>
         html, body {
             margin: 0;
             padding: 0;
             width: 100%;
-            min-height: 100vh;
+            height: 100%;
             font-family: Arial, sans-serif;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
 
-        body {
+        #wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* 为 iOS 添加弹性滚动 */
+            background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
+            color: white;
+        }
+
+        .content {
+            min-height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: linear-gradient(135deg, #1a1a1a, #4a4a4a);
-            color: white;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto; /* 允许垂直滚动 */
         }
 
         .header {
@@ -106,7 +121,7 @@
         }
 
         @media (max-width: 768px) {
-            body {
+            .content {
                 padding: 10px;
             }
 
@@ -147,31 +162,44 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>AI游戏示例</h1>
-        <div class="subtitle">选择一个游戏开始玩吧！</div>
+    <div id="wrapper">
+        <div class="content">
+            <div class="header">
+                <h1>AI游戏示例</h1>
+                <div class="subtitle">选择一个游戏开始玩吧！</div>
+            </div>
+
+            <div class="games-container">
+                <div class="game-card" onclick="location.href='tetris.html'">
+                    <div class="game-icon">🟦</div>
+                    <div class="game-title">俄罗斯方块</div>
+                    <div class="game-description">
+                        经典的俄罗斯方块游戏，通过旋转和移动不同形状的方块，创建完整的行来得分。
+                        适配PC和移动端，支持触控操作。
+                    </div>
+                    <button class="play-button">开始游戏</button>
+                </div>
+
+                <div class="game-card" onclick="location.href='snake.html'">
+                    <div class="game-icon">🐍</div>
+                    <div class="game-title">贪吃蛇</div>
+                    <div class="game-description">
+                        控制蛇移动收集食物，让它不断长大。
+                        注意不要撞到墙壁或自己的身体！
+                    </div>
+                    <button class="play-button">开始游戏</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="games-container">
-        <div class="game-card" onclick="location.href='tetris.html'">
-            <div class="game-icon">🟦</div>
-            <div class="game-title">俄罗斯方块</div>
-            <div class="game-description">
-                经典的俄罗斯方块游戏，通过旋转和移动不同形状的方块，创建完整的行来得分。
-                适配PC和移动端，支持触控操作。
-            </div>
-            <button class="play-button">开始游戏</button>
-        </div>
-
-        <div class="game-card" onclick="location.href='snake.html'">
-            <div class="game-icon">🐍</div>
-            <div class="game-title">贪吃蛇</div>
-            <div class="game-description">
-                控制蛇移动收集食物，让它不断长大。
-                注意不要撞到墙壁或自己的身体！
-            </div>
-            <button class="play-button">开始游戏</button>
-        </div>
-    </div>
+    <script>
+        // 防止微信浏览器的橡皮筋效果
+        document.body.addEventListener('touchmove', function(e) {
+            if(e.target === document.body) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
 </body>
 </html>
