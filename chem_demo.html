@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Chemical Reaction Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #000;
+            font-family: Arial, sans-serif;
+        }
+        #container {
+            text-align: center;
+        }
+        canvas {
+            background-color: #1C1C1C;
+            margin: 10px;
+        }
+        .title {
+            color: white;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h2 class="title">2H₂ + O₂ → 2H₂O</h2>
+        <canvas id="reactionCanvas"></canvas>
+    </div>
+
+<script>
+class Molecule {
+    constructor(x, y, type) {
+        this.x = x;
+        this.y = y;
+        // 增加初始速度范围
+        this.dx = (Math.random() - 0.5) * 6;
+        this.dy = (Math.random() - 0.5) * 6;
+        this.type = type;
+        this.reacted = false;
+        
+        if (type === 'H2') {
+            this.color = '#00FFFF';
+            this.label = 'H₂';
+            this.size = 20;
+        } else if (type === 'O2') {
+            this.color = '#FF4500';
+            this.label = 'O₂';
+            this.size = 25;
+        } else {
+            this.color = '#4169E1';
+            this.label = 'H₂O';
+            this.size = 30;
+            this.dx *= 0.7;
+            this.dy *= 0.7;
+        }
+    }
+
+    draw(ctx) {
+        // Draw glow effect
+        const gradient = ctx.createRadialGradient(
+            this.x, this.y, 0,
+            this.x, this.y, this.size * 1.5
+        );
+        gradient.addColorStop(0, this.color);
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        
+        ctx.beginPath();
+        ctx.fillStyle = gradient;
+        ctx.arc(this.x, this.y, this.size * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw molecule
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Draw label
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(this.label, this.x, this.y);
+    }
+
+    update(width, height) {
+        // 增加随机加速度
+        this.dx += (Math.random() - 0.5) * 0.2;
+        this.dy += (Math.random() - 0.5) * 0.2;
+
+        // 增加最大速度限制
+        const maxSpeed = 8;
+        const speed = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
+        if (speed > maxSpeed) {
+            this.dx = (this.dx / speed) * maxSpeed;
+            this.dy = (this.dy / speed) * maxSpeed;
+        }
+
+        this.x += this.dx;
+        this.y += this.dy;
+
+        // 增加反弹系数
+        const bounce = 1.2;
+        if (this.x < this.size) {
+            this.x = this.size;
+            this.dx = Math.abs(this.dx) * bounce;
+        } else if (this.x > width - this.size) {
+            this.x = width - this.size;
+            this.dx = -Math.abs(this.dx) * bounce;
+        }
+
+        if (this.y < this.size) {
+            this.y = this.size;
+            this.dy = Math.abs(this.dy) * bounce;
+        } else if (this.y > height - this.size) {
+            this.y = height - this.size;
+            this.dy = -Math.abs(this.dy) * bounce;
+        }
+    }
+}
+
+const canvas = document.getElementById('reactionCanvas');
+const ctx = canvas.getContext('2d');
+
+// Set canvas size
+canvas.width = 800;
+canvas.height = 500;
+
+// Initialize molecules
+const molecules = [];
+const n_h2 = 8;
+const n_o2 = 4;
+
+for (let i = 0; i < n_h2; i++) {
+    molecules.push(new Molecule(
+        Math.random() * (canvas.width - 100) + 50,
+        Math.random() * (canvas.height - 100) + 50,
+        'H2'
+    ));
+}
+
+for (let i = 0; i < n_o2; i++) {
+    molecules.push(new Molecule(
+        Math.random() * (canvas.width - 100) + 50,
+        Math.random() * (canvas.height - 100) + 50,
+        'O2'
+    ));
+}
+
+function checkReactions() {
+    const h2_molecules = molecules.filter(m => m.type === 'H2' && !m.reacted);
+    const o2_molecules = molecules.filter(m => m.type === 'O2' && !m.reacted);
+
+    for (const o2 of o2_molecules) {
+        const nearby_h2 = h2_molecules.filter(h2 => {
+            const dist = Math.sqrt(
+                Math.pow(h2.x - o2.x, 2) + 
+                Math.pow(h2.y - o2.y, 2)
+            );
+            return dist < 50;
+        });
+
+        if (nearby_h2.length >= 2) {
+            // Create two water molecules
+            for (let i = 0; i < 2; i++) {
+                if (i < nearby_h2.length) {
+                    const h2 = nearby_h2[i];
+                    h2.type = 'H2O';
+                    h2.color = '#4169E1';
+                    h2.label = 'H₂O';
+                    h2.size = 30;
+                    h2.dx *= 0.7;
+                    h2.dy *= 0.7;
+                    h2.reacted = true;
+                }
+            }
+
+            // Remove O2 molecule
+            const index = molecules.indexOf(o2);
+            if (index > -1) {
+                molecules.splice(index, 1);
+            }
+        }
+    }
+}
+
+function animate() {
+    ctx.fillStyle = '#1C1C1C';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    molecules.forEach(molecule => {
+        molecule.update(canvas.width, canvas.height);
+        molecule.draw(ctx);
+    });
+
+    checkReactions();
+    requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+</body>
+</html>
